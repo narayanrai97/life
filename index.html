@@ -1,0 +1,150 @@
+<html>
+    <head>
+        <style>
+            #board {
+                border-top: 1px solid black;
+                border-right: 1px solid black;
+                display: inline-block;
+            }
+
+            .cell {
+                border-bottom: 1px solid black;
+                border-left: 1px solid black;
+                width: 30px;
+                height: 30px;
+                display: inline-block;
+            }
+
+            .on {
+                background-color: blue;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="board"></div>
+        <button onclick="step();">Step</button>
+        <button onclick="start();">Start</button>
+        <button onclick="stop();">Stop</button>
+
+        <script type="text/javascript">
+            var width = 40;
+            var height = 40;
+            var board = document.getElementById("board");
+            for (var i = 0; i < width; i++){
+                var row = document.createElement("div");
+                board.appendChild(row);
+                for(var j = 0; j < height; j++){
+                    var cell = document.createElement("div");
+                    cell.className = 'cell';
+                    cell.addEventListener('click', function(){
+                        this.classList.toggle('on');
+                    });
+                    cell.id = i+'_'+j;
+                    row.appendChild(cell);
+                }
+            }
+
+            // TODO return true if cell at (i, j) is turned on
+            function isLive(i, j){
+                if(i < 0 || j < 0 || i >= width || j >= height)
+                    return false;
+                var cell = document.getElementById(i+'_'+j);
+                if (cell.classList.contains('on')){
+                    return true;
+                }
+            }
+
+            // TODO return how many neighbors are turned on for this cell
+            function neighbors(i, j){
+                var cell = document.getElementById(i+'_'+j);
+                var n = 0;
+                // your code here Hint: You can use the isLive method above
+                if (isLive(i -1, j -1)){
+                    n += 1;
+                }
+                if (isLive(i, j - 1)){
+                    n += 1;
+                }
+                if (isLive(i + 1, j -1)){
+                    n += 1;
+                }
+                if (isLive(i -1, j)){
+                    n += 1;
+                }
+                if (isLive(i +1, j)){
+                    n += 1;
+                }
+                if (isLive(i -1, j +1)){
+                    n +=1;
+                }
+                if (isLive(i, j +1)){
+                    n +=1;
+                }
+                if (isLive(i +1, j +1)){
+                    n +=1;
+                }
+                return n;
+            }
+
+            function step(){
+                console.log('step');
+
+                var future = new Array(height);
+                for(var i = 0; i < width; i++){
+                    future[i] = new Array(width);
+                }
+
+                for(var i = 0; i < width; i++){
+                    for(var j = 0; j < height; j++){
+                        var n = neighbors(i, j);
+                        var live = isLive(i, j);
+                        var cell = document.getElementById(i+'_'+j);
+                        if (j ==3 && i ==2) {                        //debugging
+                            console.log(i, j, n);
+                        }
+                        if (live){
+                            //console.log('live: ', i, j, n, live);
+                            if (n < 2) {
+                                future[i][j] = false;  // LIVE CELL w/fewer than 2 LIVE NEIGHBORS dies
+                            } else if (n > 3){
+                                future[i][j] = false;  // LIVE CELL w/more than 3 LIVE NEIGHBORS dies
+                            } else{
+                                future[i][j] = true;   //LIVE CELL w/2 or 3 LIVE NEIGHBORS lives
+                            }
+                        } else {
+                            if(n == 3){
+                                future[i][j] = true;  // DEAD CELL w/3 LIVE NEIGHBORS becomes live cell
+                            } else {
+                                future[i][j] = false;
+                            }
+                        }
+                    }
+
+                }
+
+                for(var i = 0; i < height; i++){
+                    for(var j = 0; j < width; j++){
+                        var cell = document.getElementById(i+'_'+j);
+                        if(future[i][j]){
+                            cell.classList.add('on');
+                        } else{
+                            cell.classList.remove('on');
+                        }
+                    }
+                }
+            }
+
+            var interval = null;
+
+            function start(){
+                console.log('starting...');
+                //step();
+                interval = setInterval(step, 100);
+            }
+
+            function stop(){
+                clearInterval(interval);
+            }
+        </script>
+    </body>
+</html>
